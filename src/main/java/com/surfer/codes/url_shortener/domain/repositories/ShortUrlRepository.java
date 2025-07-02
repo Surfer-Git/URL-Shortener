@@ -10,4 +10,6 @@ public interface ShortUrlRepository extends JpaRepository<ShortUrl, Long> {
 
     @Query("SELECT su FROM ShortUrl su LEFT JOIN FETCH su.createdBy WHERE su.isPrivate = false order by su.createdAt desc")
     List<ShortUrl> getAllPublicShortUrls();
+
+    boolean existsByShortKey(String shortKey);
 }

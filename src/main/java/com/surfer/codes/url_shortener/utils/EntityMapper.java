@@ -8,6 +8,9 @@ import com.surfer.codes.url_shortener.dto.UserDto;
 public class EntityMapper {
 
     public static UserDto toUserDto(User user){
+        if (user == null) {
+            return null;
+        }
         return new UserDto(
                 user.getId(),
                 user.getName(),
@@ -16,6 +19,9 @@ public class EntityMapper {
     }
 
     public static ShortUrlDto toShortUrlDto(ShortUrl shortUrl) {
+        if (shortUrl == null) {
+            return null;
+        }
         return new ShortUrlDto(
                 shortUrl.getId(),
                 shortUrl.getShortKey(),

@@ -6,6 +6,7 @@ import com.surfer.codes.url_shortener.domain.repositories.ShortUrlRepository;
 import com.surfer.codes.url_shortener.dto.CreateShortUrlCmd;
 import com.surfer.codes.url_shortener.dto.ShortUrlDto;
 import com.surfer.codes.url_shortener.utils.EntityMapper;
+import com.surfer.codes.url_shortener.utils.UrlUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,11 +32,18 @@ public class ShortUrlService {
 
     @Transactional
     public ShortUrlDto createShortUrl(CreateShortUrlCmd cmd) {
-        // TODO: validate the original URL, check for duplicates, creating a unique short key
+        // TODO: check for duplicates
+        if(appConf.validateOriginalUrl()) {
+            boolean urlExists = UrlUtils.doesUrlExists(cmd.originalUrl());
+            if(!urlExists) {
+                throw new RuntimeException("Invalid URL " + cmd.originalUrl());
+            }
+        }
 
+        String shortKey = generateUniqueShortKey();
         ShortUrl shortUrl = new ShortUrl();
         shortUrl.setOriginalUrl(cmd.originalUrl());
-        shortUrl.setShortKey("testKey");
+        shortUrl.setShortKey(shortKey);
         shortUrl.setCreatedBy(null);
         shortUrl.setPrivate(false);
         shortUrl.setClickCount(0L);
@@ -43,5 +51,13 @@ public class ShortUrlService {
         shortUrl.setCreatedAt(LocalDateTime.now());
         ShortUrl savedShortUrl = shortUrlRepository.save(shortUrl);
         return EntityMapper.toShortUrlDto(savedShortUrl);
+    }
+
+    private String generateUniqueShortKey() {
+        String shortKey;
+        do {
+            shortKey = UrlUtils.generateRandomShortKey();
+        } while (shortUrlRepository.existsByShortKey(shortKey));
+        return shortKey;
     }
 }

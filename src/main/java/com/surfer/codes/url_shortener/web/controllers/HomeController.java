@@ -47,6 +47,7 @@ public class HomeController {
             List<ShortUrlDto> shortUrls = shortUrlService.getAllPublicShortUrls();
             model.addAttribute("shortUrls", shortUrls);
             model.addAttribute("baseUrl", appConf.baseUrl());
+            model.addAttribute("createShortUrlForm", form);
             return "index";
             // the validation-errors will be passed to the view automatically.
         }
