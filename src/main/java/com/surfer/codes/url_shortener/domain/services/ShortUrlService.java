@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional(readOnly = true)
@@ -59,5 +60,22 @@ public class ShortUrlService {
             shortKey = UrlUtils.generateRandomShortKey();
         } while (shortUrlRepository.existsByShortKey(shortKey));
         return shortKey;
+    }
+
+    @Transactional
+    public Optional<ShortUrlDto> accessShortUrl(String shortKey) {
+        Optional<ShortUrl> shortUrlOpt = shortUrlRepository.findByShortKey(shortKey);
+        if(shortUrlOpt.isEmpty() || isShortUrlExpired(shortUrlOpt.get())) {
+            return Optional.empty();
+        }
+        ShortUrl shortUrl = shortUrlOpt.get();
+        shortUrl.setClickCount(shortUrl.getClickCount() + 1);
+        shortUrlRepository.save(shortUrl); // Update click count
+
+        return shortUrlOpt.map(EntityMapper::toShortUrlDto);
+    }
+
+    private boolean isShortUrlExpired(ShortUrl shortUrl) {
+        return shortUrl.getExpiresAt() != null && shortUrl.getExpiresAt().isBefore(LocalDateTime.now());
     }
 }
