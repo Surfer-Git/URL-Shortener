@@ -20,5 +20,8 @@ public record ApplicationProperties(
         int defaultExpiryInDays,
 
         @DefaultValue("true")
-        boolean validateOriginalUrl
+        boolean validateOriginalUrl,
+
+        @NotBlank
+        String securityKey
 ) {}
