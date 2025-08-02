@@ -27,7 +27,7 @@ public class SecurityConfig {
         return httpSecurity
                 .authorizeHttpRequests( authorize -> authorize
                     .requestMatchers(
-                        "/", "/short-urls", "/s/**", "/register", "/login"
+                        "/", "/short-urls", "/s/**", "/register", "/login", "/css/**"
                     ).permitAll()
                     .requestMatchers("/my-urls").authenticated()
                     .requestMatchers("/admin/**").hasRole("ADMIN")

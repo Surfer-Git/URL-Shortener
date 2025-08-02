@@ -1,0 +1,2 @@
+update users set salt = 'randomSalt123', password = 'olp02tJHkDyfTh1ANYWXpMuhdmc5hKEfgjidKxjW0i8=' where name = 'Administrator';
+update users set salt = 'randomSalt456', password = 'HmiROhkyX3dgmj11XKKpaSatBgWwQvCiZx6Ot/NmGII=' where name = 'Sample-User';

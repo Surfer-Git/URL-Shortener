@@ -1,2 +1,2 @@
 ALTER TABLE users
-ADD salt VARCHAR(32) NOT NULL;
+ADD salt VARCHAR(32);
