@@ -36,7 +36,7 @@ public class HomeController {
         List<ShortUrlDto> shortUrls = shortUrlService.getAllPublicShortUrls();
         model.addAttribute("shortUrls", shortUrls);
         model.addAttribute("baseUrl", appConf.baseUrl());
-        model.addAttribute("createShortUrlForm", new CreateShortUrlForm(""));
+        model.addAttribute("createShortUrlForm", new CreateShortUrlForm("", false, null));
         return "index";
     }
 
@@ -57,7 +57,7 @@ public class HomeController {
         }
 
         try{
-            CreateShortUrlCmd cmd = new CreateShortUrlCmd(form.originalUrl());
+            CreateShortUrlCmd cmd = new CreateShortUrlCmd(form.originalUrl(), form.isPrivate(), form.expirationDays());
             ShortUrlDto shortUrlDto = shortUrlService.createShortUrl(cmd);
             redirectAttributes.addFlashAttribute("successMessage", "Short URL created successfully " +
                     appConf.baseUrl() + "/s/" + shortUrlDto.shortKey());

@@ -2,29 +2,30 @@ package com.surfer.codes.url_shortener.domain.services;
 
 import com.surfer.codes.url_shortener.ApplicationProperties;
 import com.surfer.codes.url_shortener.domain.entities.ShortUrl;
+import com.surfer.codes.url_shortener.domain.entities.User;
 import com.surfer.codes.url_shortener.domain.repositories.ShortUrlRepository;
 import com.surfer.codes.url_shortener.dto.CreateShortUrlCmd;
 import com.surfer.codes.url_shortener.dto.ShortUrlDto;
 import com.surfer.codes.url_shortener.utils.EntityMapper;
 import com.surfer.codes.url_shortener.utils.UrlUtils;
+import com.surfer.codes.url_shortener.utils.UserUtils;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
 @Transactional(readOnly = true)
+@AllArgsConstructor
 public class ShortUrlService {
 
     private final ShortUrlRepository shortUrlRepository;
     private final ApplicationProperties appConf;
-
-    public ShortUrlService(ShortUrlRepository shortUrlRepository, ApplicationProperties appConf) {
-        this.shortUrlRepository = shortUrlRepository;
-        this.appConf = appConf;
-    }
+    private final UserUtils userUtils;
 
     public List<ShortUrlDto> getAllPublicShortUrls() {
         List<ShortUrl> shortUrls = shortUrlRepository.getAllPublicShortUrls();
@@ -41,12 +42,14 @@ public class ShortUrlService {
             }
         }
 
+        Optional<User> curUser = userUtils.getCurrentLoggedInUser();
+
         String shortKey = generateUniqueShortKey();
         ShortUrl shortUrl = new ShortUrl();
         shortUrl.setOriginalUrl(cmd.originalUrl());
         shortUrl.setShortKey(shortKey);
-        shortUrl.setCreatedBy(null);
-        shortUrl.setPrivate(false);
+        shortUrl.setCreatedBy(curUser.orElse(null));
+        shortUrl.setPrivate(cmd.isPrivate() != null && cmd.isPrivate());
         shortUrl.setClickCount(0L);
         shortUrl.setExpiresAt(LocalDateTime.now().plusDays(appConf.defaultExpiryInDays()));
         shortUrl.setCreatedAt(LocalDateTime.now());
@@ -68,11 +71,26 @@ public class ShortUrlService {
         if(shortUrlOpt.isEmpty() || isShortUrlExpired(shortUrlOpt.get())) {
             return Optional.empty();
         }
-        ShortUrl shortUrl = shortUrlOpt.get();
-        shortUrl.setClickCount(shortUrl.getClickCount() + 1);
-        shortUrlRepository.save(shortUrl); // Update click count
 
-        return shortUrlOpt.map(EntityMapper::toShortUrlDto);
+        Optional<User> curUser = userUtils.getCurrentLoggedInUser();
+
+        // if it's public or created by the current user, allow access
+        if(!shortUrlOpt.get().isPrivate() || isCreatedByCurrentUser(shortUrlOpt.get()) ){
+
+            ShortUrl shortUrl = shortUrlOpt.get();
+            shortUrl.setClickCount(shortUrl.getClickCount() + 1);
+            shortUrlRepository.save(shortUrl); // Update click count
+
+            return shortUrlOpt.map(EntityMapper::toShortUrlDto);
+        }
+        else {
+            return Optional.empty();
+        }
+    }
+
+    private boolean isCreatedByCurrentUser(ShortUrl shortUrl) {
+        Optional<User> curUser = userUtils.getCurrentLoggedInUser();
+        return curUser.isPresent() && Objects.equals(shortUrl.getCreatedBy().getId(), curUser.get().getId());
     }
 
     private boolean isShortUrlExpired(ShortUrl shortUrl) {
