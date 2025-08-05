@@ -5,11 +5,16 @@ import com.surfer.codes.url_shortener.domain.entities.ShortUrl;
 import com.surfer.codes.url_shortener.domain.entities.User;
 import com.surfer.codes.url_shortener.domain.repositories.ShortUrlRepository;
 import com.surfer.codes.url_shortener.dto.CreateShortUrlCmd;
+import com.surfer.codes.url_shortener.dto.PagedResult;
 import com.surfer.codes.url_shortener.dto.ShortUrlDto;
 import com.surfer.codes.url_shortener.utils.EntityMapper;
 import com.surfer.codes.url_shortener.utils.UrlUtils;
 import com.surfer.codes.url_shortener.utils.UserUtils;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,9 +32,15 @@ public class ShortUrlService {
     private final ApplicationProperties appConf;
     private final UserUtils userUtils;
 
-    public List<ShortUrlDto> getAllPublicShortUrls() {
-        List<ShortUrl> shortUrls = shortUrlRepository.getAllPublicShortUrls();
-        return shortUrls.stream().map(EntityMapper::toShortUrlDto).toList();
+    public PagedResult<ShortUrlDto> getAllPublicShortUrls(int pageNo, int pageSize) {
+        Pageable pageable = getPageable(pageNo, pageSize);
+        Page<ShortUrl> shortUrls = shortUrlRepository.getAllPublicShortUrls(pageable);
+        return PagedResult.from(shortUrls.map(EntityMapper::toShortUrlDto));
+    }
+
+    private Pageable getPageable(int page, int size) {
+        page = page > 1 ? (page - 1) : 0;
+        return PageRequest.of(page, size, Sort.Direction.DESC, "createdAt");
     }
 
     @Transactional

@@ -65,7 +65,7 @@
                 </tr>
                 </thead>
                 <tbody>
-                <tr th:each="url : ${shortUrls}">
+                <tr th:each="url : ${shortUrls.data()}">
                     <td>
                         <a th:href="@{/s/{key}(key=${url.shortKey})}" th:text="${baseUrl + '/s/' + url.shortKey}" target="_blank"></a>
                     </td>
@@ -78,6 +78,9 @@
                 </tr>
                 </tbody>
             </table>
+
+            <div th:insert="~{pagination}"></div>
+
         </div>
     </div>
 </div>
