@@ -30,7 +30,9 @@ public class HomeController {
     @GetMapping("/")
     public String home(Model model, @RequestParam(defaultValue = "1") Integer pageNo) {
 
-        PagedResult<ShortUrlDto> shortUrls = shortUrlService.getAllPublicShortUrls(pageNo, appConf.pageSize());
+        Long userId = userUtils.getCurrentUserId();
+
+        PagedResult<ShortUrlDto> shortUrls = shortUrlService.getPublicOrUserUrls(userId, pageNo, appConf.pageSize());
         addShortUrlsDataToModel(model, shortUrls);
 
         model.addAttribute("createShortUrlForm", new CreateShortUrlForm("", false, null));
@@ -52,8 +54,8 @@ public class HomeController {
 
         // Check for validation errors
         if(bindingResult.hasErrors()) {
-
-            PagedResult<ShortUrlDto> shortUrls = shortUrlService.getAllPublicShortUrls(1, appConf.pageSize());
+            Long userId = userUtils.getCurrentUserId();
+            PagedResult<ShortUrlDto> shortUrls = shortUrlService.getPublicOrUserUrls(userId, 1, appConf.pageSize());
             addShortUrlsDataToModel(model, shortUrls);
 
             model.addAttribute("createShortUrlForm", form);

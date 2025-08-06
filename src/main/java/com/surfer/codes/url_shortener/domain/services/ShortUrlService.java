@@ -19,7 +19,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -32,9 +31,21 @@ public class ShortUrlService {
     private final ApplicationProperties appConf;
     private final UserUtils userUtils;
 
-    public PagedResult<ShortUrlDto> getAllPublicShortUrls(int pageNo, int pageSize) {
+    public PagedResult<ShortUrlDto> getAllShortUrls(int pageNo, int pageSize) {
         Pageable pageable = getPageable(pageNo, pageSize);
-        Page<ShortUrl> shortUrls = shortUrlRepository.getAllPublicShortUrls(pageable);
+        Page<ShortUrl> shortUrls = shortUrlRepository.getAllShortUrls(pageable);
+        return PagedResult.from(shortUrls.map(EntityMapper::toShortUrlDto));
+    }
+
+    public PagedResult<ShortUrlDto> getPublicOrUserUrls(Long userId, int pageNo, int pageSize) {
+        Pageable pageable = getPageable(pageNo, pageSize);
+        Page<ShortUrl> shortUrls;
+        if(null == userId){ // if user is not logged in, return public URLs
+            shortUrls = shortUrlRepository.getAllPublicShortUrls(pageable);
+        }
+        else{
+            shortUrls = shortUrlRepository.getPublicOrUserUrls(userId, pageable);
+        }
         return PagedResult.from(shortUrls.map(EntityMapper::toShortUrlDto));
     }
 

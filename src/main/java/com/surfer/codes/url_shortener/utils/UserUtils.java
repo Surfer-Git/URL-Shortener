@@ -29,6 +29,6 @@ public class UserUtils {
     public Long getCurrentUserId() {
         return getCurrentLoggedInUser()
                 .map(User::getId)
-                .orElseThrow(() -> new IllegalStateException("No user is currently logged in"));
+                .orElse(null);
     }
 }

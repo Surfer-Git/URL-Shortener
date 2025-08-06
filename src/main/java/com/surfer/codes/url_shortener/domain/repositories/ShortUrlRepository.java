@@ -11,8 +11,14 @@ import java.util.Optional;
 
 public interface ShortUrlRepository extends JpaRepository<ShortUrl, Long> {
 
+    @Query("SELECT su FROM ShortUrl su")
+    Page<ShortUrl> getAllShortUrls(Pageable pageable);
+
     @Query("SELECT su FROM ShortUrl su LEFT JOIN FETCH su.createdBy WHERE su.isPrivate = false")
     Page<ShortUrl> getAllPublicShortUrls(Pageable pageable);
+
+    @Query("SELECT su FROM ShortUrl su LEFT JOIN FETCH su.createdBy WHERE su.isPrivate = false OR su.createdBy.id = :userId")
+    Page<ShortUrl> getPublicOrUserUrls(Long userId, Pageable pageable);
 
     @Query("SELECT su FROM ShortUrl su LEFT JOIN FETCH su.createdBy WHERE su.createdBy.id = :userId")
     Page<ShortUrl> getUrlsByUserId(Long userId, Pageable pageable);
