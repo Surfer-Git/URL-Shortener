@@ -68,6 +68,12 @@ public class ShortUrlService {
         return EntityMapper.toShortUrlDto(savedShortUrl);
     }
 
+    public PagedResult<ShortUrlDto> getUserShortUrls(Long userId, int pageNo, int pageSize) {
+        Pageable pageable = getPageable(pageNo, pageSize);
+        Page<ShortUrl> shortUrls = shortUrlRepository.getUrlsByUserId(userId, pageable);
+        return PagedResult.from(shortUrls.map(EntityMapper::toShortUrlDto));
+    }
+
     private String generateUniqueShortKey() {
         String shortKey;
         do {

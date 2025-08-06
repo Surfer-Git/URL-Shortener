@@ -6,6 +6,7 @@ import com.surfer.codes.url_shortener.dto.CreateShortUrlCmd;
 import com.surfer.codes.url_shortener.dto.CreateShortUrlForm;
 import com.surfer.codes.url_shortener.dto.PagedResult;
 import com.surfer.codes.url_shortener.dto.ShortUrlDto;
+import com.surfer.codes.url_shortener.utils.UserUtils;
 import com.surfer.codes.url_shortener.web.exceptions.ShortUrlNotFoundException;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -24,16 +25,21 @@ public class HomeController {
 
     private final ShortUrlService shortUrlService;
     private final ApplicationProperties appConf;
+    private final UserUtils userUtils;
 
     @GetMapping("/")
     public String home(Model model, @RequestParam(defaultValue = "1") Integer pageNo) {
-        addShortUrlsDataToModel(model, pageNo);
+
+        PagedResult<ShortUrlDto> shortUrls = shortUrlService.getAllPublicShortUrls(pageNo, appConf.pageSize());
+        addShortUrlsDataToModel(model, shortUrls);
+
         model.addAttribute("createShortUrlForm", new CreateShortUrlForm("", false, null));
+        model.addAttribute("paginationUrl", "/");
+
         return "index";
     }
 
-    private void addShortUrlsDataToModel(Model model, int pageNo) {
-        PagedResult<ShortUrlDto> shortUrls = shortUrlService.getAllPublicShortUrls(pageNo, appConf.pageSize());
+    private void addShortUrlsDataToModel(Model model, PagedResult<ShortUrlDto> shortUrls) {
         model.addAttribute("shortUrls", shortUrls);
         model.addAttribute("baseUrl", appConf.baseUrl());
     }
@@ -46,8 +52,12 @@ public class HomeController {
 
         // Check for validation errors
         if(bindingResult.hasErrors()) {
-            addShortUrlsDataToModel(model, 1);
+
+            PagedResult<ShortUrlDto> shortUrls = shortUrlService.getAllPublicShortUrls(1, appConf.pageSize());
+            addShortUrlsDataToModel(model, shortUrls);
+
             model.addAttribute("createShortUrlForm", form);
+            model.addAttribute("paginationUrl", "/");
             return "index";
             // the validation-errors will be passed to the view automatically.
         }
@@ -77,6 +87,18 @@ public class HomeController {
     @GetMapping("/login")
     String loginForm() {
         return "login";
+    }
+
+    @GetMapping("/my-urls")
+    public String myUrls(Model model, @RequestParam(defaultValue = "1") Integer pageNo){
+
+        Long currentUserId = userUtils.getCurrentUserId();
+        PagedResult<ShortUrlDto> myUrls = shortUrlService.getUserShortUrls(currentUserId, pageNo, appConf.pageSize());
+
+        addShortUrlsDataToModel(model, myUrls);
+        model.addAttribute("paginationUrl", "/my-urls");
+
+        return "my-urls";
     }
 
 }

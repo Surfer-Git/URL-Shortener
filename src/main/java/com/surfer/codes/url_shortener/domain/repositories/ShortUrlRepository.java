@@ -14,6 +14,9 @@ public interface ShortUrlRepository extends JpaRepository<ShortUrl, Long> {
     @Query("SELECT su FROM ShortUrl su LEFT JOIN FETCH su.createdBy WHERE su.isPrivate = false")
     Page<ShortUrl> getAllPublicShortUrls(Pageable pageable);
 
+    @Query("SELECT su FROM ShortUrl su LEFT JOIN FETCH su.createdBy WHERE su.createdBy.id = :userId")
+    Page<ShortUrl> getUrlsByUserId(Long userId, Pageable pageable);
+
     boolean existsByShortKey(String shortKey);
 
     Optional<ShortUrl> findByShortKey(String shortKey);
