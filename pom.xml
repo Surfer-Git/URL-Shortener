@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.surfer.codes</groupId>
 	<artifactId>url-shortener</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.0.0</version>
 	<name>url-shortener</name>
 	<description>url-shortener</description>
 	<url/>
@@ -99,6 +99,9 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<configuration>
+                    <image>
+                        <name>surfergit/${project.artifactId}</name>
+                    </image>
 					<excludes>
 						<exclude>
 							<groupId>org.projectlombok</groupId>
