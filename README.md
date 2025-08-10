@@ -19,7 +19,7 @@ docker compose up -d
 - there are 2 users - admin & sample-user.
 - for login credentials (refer tests or flyway-migration script).
 - user can shorten url and keep it as public or private.
-- user can specify url expiration time (deafult will be 365 days).
+- user can specify url expiration time (deafult will be 30 days).
 - public urls : will be visible to everyone.
 - private urls : visible to the user only.
 
